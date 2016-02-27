@@ -116,50 +116,50 @@ function getWelcomeResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
     var cardTitle = "Welcome";
-    var speechOutput = "Welcome to the Alexa Skills DevTalk. " +
-        "Please tell or ask me about a tool you'd like to learn";
+    var speechOutput = "Welcome to DevTalk. " +
+        "Please tell, or ask me about a Dev tool that you'd like to learn";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
     var repromptText = "Please tell me a tool you'd like to learn more about";
     var shouldEndSession = false;
-
+    
     callback(sessionAttributes,
-        buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
 function getSpecificCommand(intent, session, callback) {
     console.log("INSIDE getSpecificCommND");
     var cardTitle = intent.name;
     var selectedTool;
-	var generalCommand;
-	var specificCommand;
+    var generalCommand;
+    var specificCommand;
     var repromptText = null;
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-	var generalCommandSlot = intent.slots.CmdGen;
-	var specificCommandSlot = intent.slots.CmdSpe;
-
-	if (session.attributes) {
-		selectedTool = session.attributes.selectedTool;
-	} else {
-		speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
-		shouldEndSession = true;
+    var generalCommandSlot = intent.slots.CmdGen;
+    var specificCommandSlot = intent.slots.CmdSpe;
+    
+    if (session.attributes) {
+	selectedTool = session.attributes.selectedTool;
+    } else {
+	speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
+	shouldEndSession = true;
         callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
-
+    
     console.log("BEFORE makeFinalCommandReq");
-	if(generalCommandSlot){
-		generalCommand = generalCommandSlot.value;
-	}
-	else{
-		speechOutput = "Oops! You haven't selected a command yet. Say, Tell me about vim. Goodbye";
-		shouldEndSession = true;
+    if(generalCommandSlot){
+	generalCommand = generalCommandSlot.value;
+    }
+    else{//YO
+	speechOutput = "Oops! You haven't selected a command yet. Say, Tell me about vim. Goodbye"; //THIS NEEDS TO BE FIXED
+	shouldEndSession = true; //THIS NEEDS TO BE FIXED
         callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-	}
-
+		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    }
+    
     if (specificCommandSlot) {
         specificCommand = specificCommandSlot.value;
         makeFinalCommandReq(selectedTool, generalCommand, specificCommand, function (result) {
@@ -197,16 +197,17 @@ function getGeneralCommand(intent, session, callback) {
         speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
         shouldEndSession = true;
         callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
     console.log("BEFORE makeFinalCommandReq");
     if (generalCommandSlot) {
         generalCommand = generalCommandSlot.value;
-        makeFinalCommandReq(selectedTool, generalCommand, null, function (result) {
+        
+	makeFinalCommandReq(selectedTool, generalCommand, null, function (result) {
             console.log("finished makeFinalCommandReq, response = "+ result);
             callback(sessionAttributes,
-                buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
-
+                     buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
+	    
         });
         //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
 
@@ -342,8 +343,11 @@ function setToolInSession(intent, session, callback) {
         }
 	}
         sessionAttributes = createToolAttributes(selectedTool);
+
+	var vbool = selectedTool === "vim"; //is selected tool vim?
+
         speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
-            "for a shorcut or command, by saying, for example, how do I insert?";
+            "for a shorcut or command, by saying, for example," + (vbool ? "how do I highlight the URL" : " how do I insert?");
         repromptText = "Ask me for a shortcut or command by saying how do I do something?";
     } else {
         speechOutput = "I'm not sure what application you're using. Please try again";
