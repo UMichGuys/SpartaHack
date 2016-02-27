@@ -8,7 +8,7 @@
  */
 
 
-var http = require('https')
+var https = require('https')
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
@@ -87,7 +87,7 @@ function onIntent(intentRequest, session, callback) {
         getToolFromSession(intent, session, callback);
     } else if ("RequestCmdGenIntent" === intentName) {
         getGeneralCommand(intent, session, callback); 
-    } else if ("RequestCmdSpecIntent" === intentName) {
+    } else if ("RequestCmdSpeIntent" === intentName) {
         getSpecificCommand(intent, session, callback);
     } else if ("LearnMoreIntent" === intentName) {
         learnMore(intent, session, callback);
@@ -155,12 +155,12 @@ function getSpecificCommand(intent, session, callback) {
         Command = generalCommandSlot.value + " ";
 	
 	// how do i delete 2/4/7/n lines
-        if (num_to_n)
-	    Command += "n ";
-	
-	Command += specificCommandSlot.value;
+        if (num_to_n) {
+	       Command += "n ";
+        }	
+	    Command += specificCommandSlot.value;
 
-	makeFinalCommandReq(selectedTool, Command, response);
+	    makeFinalCommandReq(selectedTool, Command, response);
         speechOutput = response;
         //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
 
@@ -181,6 +181,7 @@ function checkCorrect(intent, session, callback) {
 }
 
 function getGeneralCommand(intent, session, callback) {
+    console.log("INSIDE getGeneralCommand");
     var cardTitle = intent.name;
     var selectedTool;
     var generalCommand;
@@ -198,12 +199,16 @@ function getGeneralCommand(intent, session, callback) {
         callback(sessionAttributes,
          buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
-
+    console.log("BEFORE makeFinalCommandReq");
     if (generalCommandSlot) {
         var response;
         generalCommand = generalCommandSlot.value;
-        makeFinalCommandReq(selectedTool, generalCommand, response);
-        speechOutput = response;
+        makeFinalCommandReq(selectedTool, generalCommand, response, function (result) {
+            console.log("finished makeFinalCommandReq, response = "+ result);
+            callback(sessionAttributes,
+                buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
+
+        });
         //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
 
     } else {
@@ -211,8 +216,7 @@ function getGeneralCommand(intent, session, callback) {
         repromptText = "";
     }
 
-    callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    
 
 
 }
@@ -240,42 +244,49 @@ function learnMore(intent, session, callback) {
 
 }
 
-function makeFinalCommandReq(tool, command, response) {
+function makeFinalCommandReq(tool, command, response, callback) {
+    console.log("TESTING123 are we here?");
     makeCommandReq(tool, command, function commandReqCallback(err, commandResponse) {
         var speechOutput;
-
+        console.log("supposedly have commandResp and it = " + commandResponse);
         if (err) {
             speechOutput = "Sorry, we couldn't handle your command request. Please try again later.";
         } else {
-            speechOutput = "To " + command + " in " + session + " press " + commandResponse.command_data;
+            speechOutput = "To " + command + " in " + tool + " press " + commandResponse;
         }
-
+        speechOutput = speechOutput.replace(/['"]+/g, '');
+        console.log("speechOutput = " + speechOutput);
         response.tell(speechOutput);
+        callback(speechOutput);
     });
+
 }
 
 function makeCommandReq(tool, command, commandReqCallback) {
-    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + tool + "/" + command + ".json";
+    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + tool + "/" + command + "/line.json";
+    console.log("inside makeCommandReq endpoint =" + endpoint);
 
-    http.get(endpoint, function (){
+    https.get(endpoint, function (res){
         var ourResponseString = '';
         console.log('Status Code: ' + res.statusCode);
 
         if (res.statusCode != 200) {
+            console.log("NON 200 status code");
             commandReqCallback(new Error("Non 200 Response"));
         }
 
         res.on('data', function (data) {
             ourResponseString += data;
+            console.log("ourResponseString = "+ourResponseString);
         });
 
         res.on('end', function () {
-            var ourResponseObject = JSON.parse(ourResponseString);
-
-            if (ourResponseObject.error) {
-                console.log("Response error: "+ ourResponseObject.error.message);
+            console.log("ourResponseString = " + ourResponseString);
+            if (ourResponseString.error) {
+                console.log("Response error: "+ ourResponseString.error.message);
             } else {
-                var command = findCommand(ourResponseObject);
+                var command = ourResponseString;
+                console.log("command string =" +command);
                 commandReqCallback(null, command);
             }
         });
