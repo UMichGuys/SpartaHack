@@ -201,9 +201,8 @@ function getGeneralCommand(intent, session, callback) {
     }
     console.log("BEFORE makeFinalCommandReq");
     if (generalCommandSlot) {
-        var response;
         generalCommand = generalCommandSlot.value;
-        makeFinalCommandReq(selectedTool, generalCommand, response, function (result) {
+        makeFinalCommandReq(selectedTool, generalCommand, function (result) {
             console.log("finished makeFinalCommandReq, response = "+ result);
             callback(sessionAttributes,
                 buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
@@ -244,7 +243,7 @@ function learnMore(intent, session, callback) {
 
 }
 
-function makeFinalCommandReq(tool, command, response, callback) {
+function makeFinalCommandReq(tool, command, callback) {
     console.log("TESTING123 are we here?");
     makeCommandReq(tool, command, function commandReqCallback(err, commandResponse) {
         var speechOutput;
@@ -256,7 +255,6 @@ function makeFinalCommandReq(tool, command, response, callback) {
         }
         speechOutput = speechOutput.replace(/['"]+/g, '');
         console.log("speechOutput = " + speechOutput);
-        response.tell(speechOutput);
         callback(speechOutput);
     });
 
