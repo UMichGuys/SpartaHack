@@ -238,7 +238,7 @@ function makeCommandReq(err, command, commandReqCallback) {
 function findCommand(object) {
     return {
         command_data: object.data //should be object.JSON_name
-    }
+    };
 }
 
 /**
