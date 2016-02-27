@@ -120,6 +120,7 @@ function getWelcomeResponse(callback) {
 
 
 
+
 /**
  * Sets the tool (application) in the session and prepares the speech to reply to the user.
  */
@@ -136,7 +137,7 @@ function setToolInSession(intent, session, callback) {
         sessionAttributes = createToolAttributes(selectedTool);
         speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
             "for a shorcut, by saying, for example, how do I insert?";
-        repromptText = "Ask me for a shortcut by saying how do I do something?";
+        repromptText = "Ask me for a shortcut or command by saying how do I do something?";
     } else {
         speechOutput = "I'm not sure what application you're using. Please try again";
         repromptText = "I'm not sure what your application you're using"  +
