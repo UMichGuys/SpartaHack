@@ -7,6 +7,9 @@
  * http://amzn.to/1LGWsLG
  */
 
+
+var http = require('https')
+
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
 exports.handler = function (event, context) {
@@ -114,7 +117,7 @@ function getWelcomeResponse(callback) {
     var sessionAttributes = {};
     var cardTitle = "Welcome";
     var speechOutput = "Welcome to the Alexa Skills DevTalk. " +
-        "Please tell ask me about a tool you'd like to learn";
+        "Please tell or ask me about a tool you'd like to learn";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
     var repromptText = "Please tell me a tool you'd like to learn more about";
@@ -134,20 +137,119 @@ function checkCorrect(intent, session, callback) {
 
 function getGeneralCommand(intent, session, callback) {
     var cardTitle = intent.name;
-    var selectedCmd = intent.slots.CmdGen;
+    var selectedTool;
+    var generalCommand;
+    var repromptText = null;
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "";
+    var generalCommandSlot = intent.slots.CmdGen;
+
+    if (session.attributes) {
+        selectedTool = session.attributes.selectedTool;
+    } else {
+        speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
+        shouldEndSession = true;
+        callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    }
+
+    if (generalCommandSlot) {
+        var response;
+        generalCommand = generalCommandSlot.value;
+        makeFinalCommandReq(selectedTool, generalCommand, response);
+        speechOutput = response;
+        //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
+
+    } else {
+        speechOutput = "Oops! you didnt select a tool. Try requesting a tool. Say, tell me how to delete";
+        repromptText = "";
+    }
+
+    callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+
+
 }
 
 function learnMore(intent, session, callback) {
+    var cardTitle = intent.name;
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "I didn't hear what you said. Please say yes or no.";
+    var learnMoreAction = intent['slots']['Decision']['value'];
+
+    if (learnMoreAction === 'yes') {
+        //func to grab more info
+        //for now just do the same thing as else
+        speechOutput = "Ok I hope I could help. Happy programming.";
+        shouldEndSession = true;
+    } else {
+        speechOutput = "Ok I hope I could help. Happy programming.";
+        shouldEndSession = true;
+    }
+
+    callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
 }
 
+function makeFinalCommandReq(tool, command, response) {
+    makeCommandReq(tool, command, function commandReqCallback(err, commandResponse) {
+        var speechOutput;
 
+        if (err) {
+            speechOutput = "Sorry, we couldn't handle your command request. Please try again later.";
+        } else {
+            speechOutput = "To " + command + " in " + session + " press " + commandResponse.command_data;
+        }
+
+        response.tell(speechOutput);
+    });
+}
+
+function makeCommandReq(tool, command, commandReqCallback) {
+    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + tool + "/" + command + ".json";
+
+    http.get(endpoint, function (){
+        var ourResponseString = '';
+        console.log('Status Code: ' + res.statusCode);
+
+        if (res.statusCode != 200) {
+            commandReqCallback(new Error("Non 200 Response"));
+        }
+
+        res.on('data', function (data) {
+            ourResponseString += data;
+        });
+
+        res.on('end', function () {
+            var ourResponseObject = JSON.parse(ourResponseString);
+
+            if (ourResponseObject.error) {
+                console.log("Response error: "+ ourResponseObject.error.message);
+            } else {
+                var command = findCommand(ourResponseObject);
+                commandReqCallback(null, command);
+            }
+        });
+    }).on('error', function (e) {
+        console.log("Communication error: " + e.message);
+        commandReqCallback(new Error(e.message));
+    });
+}
+
+function findCommand(object) {
+    return {
+        command_data: object.data //should be object.JSON_name
+    };
+}
 
 /**
  * Sets the tool (application) in the session and prepares the speech to reply to the user.
  */
 function setToolInSession(intent, session, callback) {
-    var cardTitle = intent.name;
     var selectedToolSlot = intent.slots.Tool;
     var repromptText = "";
     var sessionAttributes = {};
@@ -158,7 +260,7 @@ function setToolInSession(intent, session, callback) {
         var selectedTool = selectedToolSlot.value;
         sessionAttributes = createToolAttributes(selectedTool);
         speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
-            "for a shorcut, by saying, for example, how do I insert?";
+            "for a shorcut or command, by saying, for example, how do I insert?";
         repromptText = "Ask me for a shortcut or command by saying how do I do something?";
     } else {
         speechOutput = "I'm not sure what application you're using. Please try again";
@@ -167,7 +269,7 @@ function setToolInSession(intent, session, callback) {
     }
 
     callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+         buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
 }
 
 
