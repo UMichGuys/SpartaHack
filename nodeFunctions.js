@@ -310,11 +310,11 @@ function setToolInSession(intent, session, callback) {
     
     if (selectedToolSlot) {
         var selectedTool = selectedToolSlot.value;
-	for (i in possiblefailures)
+	for (var i in possiblefailures)
 	{
-	    if (selectedToolSlot === possiblefailures[i])
+	    if (selectedTool === possiblefailures[i])
 	    {
-		selectedToolSlot = vim;
+		  selectedTool = vim;
 	    }
 	}
         sessionAttributes = createToolAttributes(selectedTool);
