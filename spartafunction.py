@@ -70,6 +70,8 @@ def on_intent(intent_request, session):
         return set_color_in_session(intent, session)
     elif intent_name == "WhatsMyColorIntent":
         return get_color_from_session(intent, session)
+    elif intent_name == "GiveToolIntent":
+    	return set_tool_in_session(intent, session)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     else:
@@ -106,6 +108,31 @@ def get_welcome_response():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
+def set_tool_in_session(intent, session):
+    """ Sets the tool in the session and prepares the speech to reply to the
+    user.
+    """
+
+    card_title = intent['name']
+    session_attributes = {}
+    should_end_session = False
+
+    if 'Tool' in intent['slots']:
+        my_tool = intent['slots']['Tool']['value']
+        session_attributes = create_tool_attributes(my_tool)
+        speech_output = "You would like to know about" + \
+                        my_tool + \
+                        ". You can ask me your about a shortcut by asking questions like, " \
+                        "What is the " + my_tool " command for something?"
+        reprompt_text = "Ask me about a command for " + my_tool
+    else:
+        speech_output = "I don't recognize the application you asked for" \
+                        "Please try again."
+        reprompt_text = "I don't recognize the application you asked for" \
+                        "You can tell me your application by saying" \
+                        "tell me about vim."
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
 
 def set_color_in_session(intent, session):
     """ Sets the color in the session and prepares the speech to reply to the
@@ -137,6 +164,9 @@ def set_color_in_session(intent, session):
 
 def create_favorite_color_attributes(favorite_color):
     return {"favoriteColor": favorite_color}
+
+def create_tool_attributes(chosen_tool):
+	return {"chosenTool": chosen_tool}
 
 
 def get_color_from_session(intent, session):
