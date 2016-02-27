@@ -83,6 +83,9 @@ function onIntent(intentRequest, session, callback) {
     } else if ("GiveToolIntent" === intentName) {
         setToolInSession(intent, session, callback);
     }
+    else if ("WhatsMyToolIntent" === intentName) {
+        getToolFromSession(intent, session, callback);
+    }
     else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
@@ -151,6 +154,31 @@ function createToolAttributes(selectedTool) {
     return {
         selectedTool: selectedTool
     };
+}
+
+function getToolFromSession(intent, session, callback) {
+    var selectedTool;
+    var repromptText = null;
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "";
+
+    if (session.attributes) {
+        selectedTool = session.attributes.selectedTool;
+    }
+
+    if (selectedTool) {
+        speechOutput = "Your selected tool is " + selectedTool + ". Goodbye.";
+        shouldEndSession = true;
+    } else {
+        speechOutput = "I'm not sure what your selected tool is. Say Tell me about vim.";
+    }
+
+    // Setting repromptText to null signifies that we do not want to reprompt the user.
+    // If the user does not respond or says something that is not understood, the session
+    // will end.
+    callback(sessionAttributes,
+         buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
 }
 
 function getColorFromSession(intent, session, callback) {
