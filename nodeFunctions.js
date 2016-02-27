@@ -114,7 +114,7 @@ function getWelcomeResponse(callback) {
     var sessionAttributes = {};
     var cardTitle = "Welcome";
     var speechOutput = "Welcome to the Alexa Skills DevTalk. " +
-        "Please tell ask me about a tool you'd like to learn";
+        "Please tell or ask me about a tool you'd like to learn";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
     var repromptText = "Please tell me a tool you'd like to learn more about";
@@ -258,7 +258,7 @@ function setToolInSession(intent, session, callback) {
         var selectedTool = selectedToolSlot.value;
         sessionAttributes = createToolAttributes(selectedTool);
         speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
-            "for a shorcut, by saying, for example, how do I insert?";
+            "for a shorcut or command, by saying, for example, how do I insert?";
         repromptText = "Ask me for a shortcut or command by saying how do I do something?";
     } else {
         speechOutput = "I'm not sure what application you're using. Please try again";
