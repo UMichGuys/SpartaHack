@@ -309,9 +309,18 @@ function setToolInSession(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-
+    
+    var possiblefailures = ["vin", "bin", "them", "van"]
+    
     if (selectedToolSlot) {
         var selectedTool = selectedToolSlot.value;
+	for (i in possiblefailures)
+	{
+	    if (selectedToolSlot === possiblefailures[i])
+	    {
+		selectedToolSlot = vim;
+	    }
+	}
         sessionAttributes = createToolAttributes(selectedTool);
         speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
             "for a shorcut or command, by saying, for example, how do I insert?";
