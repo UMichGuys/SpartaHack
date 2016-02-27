@@ -1,12 +1,15 @@
 ******************************************************
-V1.0 3:01
-V1.1 6:34
-V1.2 9:37
+-V1.0 3:01
+-V1.1 6:34
+-V1.2 9:37
+-V1.3 4:07
 ******************************************************
 
-*----V1.0------*
+-ChangeLog
 
-*------UI------*
+-*----V1.0------*
+
+-*------UI------*
 
 Create "Utterances"
 
@@ -65,7 +68,7 @@ RequestCmdSpeIntent {Query} {CmdSpe}
 -------_V1.1-----------
 
 
-*------V1.2---------*
+-*------V1.2---------*
 
 -Goals moving forward
   - interfacing with the backend which needs to interface with firebase
@@ -113,7 +116,7 @@ Respond to "Utterances"
    *
    *
    *
-
+Backend database is all handled by firebase. 
 
 ---N_Backend----
 
