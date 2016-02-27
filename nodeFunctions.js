@@ -314,7 +314,7 @@ function setToolInSession(intent, session, callback) {
 	{
 	    if (selectedTool === possiblefailures[i])
 	    {
-		  selectedTool = vim;
+		  selectedTool = "vim";
 	    }
 	}
         sessionAttributes = createToolAttributes(selectedTool);
