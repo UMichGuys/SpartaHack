@@ -1,10 +1,12 @@
 ******************************************************
 V1.0 3:01
 V1.1 6:34
+V1.2 9:37
 ******************************************************
 
+*----V1.0------*
 
-------UI------
+*------UI------*
 
 Create "Utterances"
 
@@ -38,9 +40,11 @@ Create "Utterances"
     *
     *
     *
+*--------_V1.0-----------*
 
+*---------V1.1-----------*
 
--V1.1 Sample Utterances-
+*-Sample Utterances-*
 
 GiveToolIntent tell me about {Tool}
 GiveToolIntent tell me more about {Tool}
@@ -57,17 +61,35 @@ RequestCmdGenIntent {Query} {CmdGen}
 RequestCmdSpeIntent {Query} AMAZON.NUMBER {CmdSpe}
 RequestCmdSpeIntent {Query} {CmdSpe}
 
--------_Ut-------------
+------_SUtterance------
+-------_V1.1-----------
 
 
--Tree struct
-  - see slack
+*------V1.2---------*
+
+-Goals moving forward
+  - interfacing with the backend which needs to interface with firebase
+  - Getting shit done by 5:00pm
+  - eat food, not carbs
+  - need to review and refamiliarize with the schema
+  - get Al on Slack
 
 
+-Amazon Alexa Team Will be back at 10:00p
+
+-Feeling good. Leggo team.
+
+-----_V1.2----
 -----N_UI-----
 
 
-----Backend----
+
+###################################################################
+
+#need to update this with work Alb
+
+
+*---Backend---*
 
 Respond to "Utterances"
 
