@@ -1,0 +1,21 @@
+The Alexa Platform
+
+Skills:
+ -Call out to any webserver
+ -Do IoT things with
+   -with next 
+   -hue
+   -etc
+ -Alexa App
+
+Utterances: DeviceStateIntent is the [DeviceName] open
+	    DeviceStateIntent did I close the [DeviceName]
+
+Intents
+  -Slots are variables
+
+Functions in your web service if (device === thing)
+
+AWS has a service called lambda. it sets up a function that allows the user not to worry about the hardware. 
+
+JSON defines the intents
