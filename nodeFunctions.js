@@ -82,10 +82,9 @@ function onIntent(intentRequest, session, callback) {
         setColorInSession(intent, session, callback);
     } else if ("WhatsMyColorIntent" === intentName) {
         getColorFromSession(intent, session, callback);
-    } else if ("GetToolIntent" === intentName) {
+    } else if ("GiveToolIntent" === intentName) {
         setToolInSession(intent, session, callback);
     }
-
     else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
