@@ -125,7 +125,7 @@ function getWelcomeResponse(callback) {
 /**
  * Sets the tool (application) in the session and prepares the speech to reply to the user.
  */
-function setIntentInSession(intent, session, callback) {
+function setToolInSession(intent, session, callback) {
     var cardTitle = intent.name;
     var selectedToolSlot = intent.slots.Tool;
     var repromptText = "";
