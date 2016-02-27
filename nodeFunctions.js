@@ -271,15 +271,31 @@ function makeCommandReq(tool, command, specifier, commandReqCallback) {
 
         res.on('data', function (data) {
             ourResponseString += data;
-            console.log("ourResponseString = "+ourResponseString);
+            console.log("CHECK RESPONSE: " + ourResponseString);
         });
 
         res.on('end', function () {
-            console.log("ourResponseString = " + ourResponseString);
-            if (ourResponseString.error) {
+            var ourResponseObject = JSON.parse(ourResponseString);
+            console.log("ourResponseObject = " + ourResponseObject);
+            console.log("ourResponseString.n = "+ourResponseObject["n"]);
+            if (ourResponseObject.error) {
                 console.log("Response error: "+ ourResponseString.error.message);
             } else {
-                var command = ourResponseString;
+                var command = "";
+                if (ourResponseObject["n"] != undefined) {
+                    console.log("found n objects in JSON");
+                    var i = 0;
+                    for (var key in ourResponseObject) {
+                        if (i > 2 || i > ourResponseObject["n"]) break;
+                        if (key === "n") continue;
+                        command += key + " " + ourResponseObject[key];
+                        ++i;
+                    }
+                }
+                else {
+                    console.log("unfortunetly I could not find the number of commands");
+                    command = ourResponseObject;
+                }
                 console.log("command string =" +command);
                 commandReqCallback(null, command);
             }
@@ -306,16 +322,20 @@ function setToolInSession(intent, session, callback) {
     var shouldEndSession = false;
     var speechOutput = "";
     
-    var possiblefailures = ["vin", "bin", "them", "van"]
+    var possibleVimFailures = ["vin", "bin", "them", "van"];
+
     
     if (selectedToolSlot) {
         var selectedTool = selectedToolSlot.value;
-	for (var i in possiblefailures)
+	for (var i in possibleVimFailures)
 	{
-	    if (selectedTool === possiblefailures[i])
-	    {
+	    if (selectedTool === possibleVimFailures[i]) {
 		  selectedTool = "vim";
-	    }
+          break;
+	    } else if (selectedTool === "google chrome") {
+            selectedTool = "chrome";
+            break;
+        }
 	}
         sessionAttributes = createToolAttributes(selectedTool);
         speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
