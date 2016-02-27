@@ -153,12 +153,12 @@ function getGeneralCommand(intent, session, callback) {
     if (generalCommandSlot) {
         generalCommand = generalCommandSlot.value;
         //makeFinalCommandReq(selectedTool, command, response)
+        //speechOutput = response (??)
+        speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
 
     } else {
         speechOutput = "Oops! you didnt select a tool. Try requesting a tool. Say, tell me how to delete";
         repromptText = "";
-        callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
 
     callback(sessionAttributes,
