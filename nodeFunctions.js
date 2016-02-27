@@ -133,6 +133,7 @@ function checkCorrect(intent, session, callback) {
 }
 
 function getGeneralCommand(intent, session, callback) {
+    var cardTitle = intent.name;
     var selectedTool;
     var generalCommand;
     var repromptText = null;
@@ -168,6 +169,7 @@ function getGeneralCommand(intent, session, callback) {
 }
 
 function learnMore(intent, session, callback) {
+    var cardTitle = intent.name;
     var repromptText = "";
     var sessionAttributes = {};
     var shouldEndSession = false;
