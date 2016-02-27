@@ -19,3 +19,51 @@ Functions in your web service if (device === thing)
 AWS has a service called lambda. it sets up a function that allows the user not to worry about the hardware. 
 
 JSON defines the intents
+
+-----Questions------
+
+Max time delay between prompts is 8 seconds. should be able to modify it.
+
+Cross session saving?
+Currently we are only saving the state of the session
+
+Score keeper on the amzazon github account shows and example of xss
+
+Can store in a dynomo db table, map colors to users, save the information to another database.
+
+Lambda function ends once session closes. New lambda is created for future requests.
+
+no voice recognition 
+
+Can have a bunch of different responses to a function. 
+It's just a string.
+
+SSML is a markup language that allows you to phoenticly modify 
+and manipulate the word.
+
+Security concerns of Alexa? All of it is under customer control. 
+Paul has had Buddies mess with him by reordering toilet paper.
+
+You can not modify other skills to put passwords, or wrap them to call
+other skills. Might be a feature later.
+-----_Questions-----
+
+----Best Practices for Voice User Design----
+
+Definitive choices
+Automatic learning
+  - map it to user so that it is saved when they want to know info in the future
+  - Probably could be useful for saving "what are the past 5 commands" or most frequently asked commands?
+
+Use Punctuation
+  - adds inflection
+
+AMAZON.HELPINTENT
+
+Add in Account linking
+
+use service simulator to test
+
+bit.ly/aws-mlh for 100$ aws credit
+
+----_best Practices---------
