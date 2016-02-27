@@ -128,52 +128,52 @@ function getWelcomeResponse(callback) {
 }
 
 function getSpecificCommand(intent, session, callback) {
+    console.log("INSIDE getSpecificCommND");
     var cardTitle = intent.name;
     var selectedTool;
-    var generalCommand;
+	var generalCommand;
+	var specificCommand;
     var repromptText = null;
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    var specificCommandSlot = intent.slots.CmdSpe;
-    var generalCommandSlot = intent.slots.CmdGen;
-    var num_to_n = intent.slots.AMAZON.NUMBER;
- 
-    if (session.attributes) {
-        selectedTool = session.attributes.selectedTool;
-    } else {
-        speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
-        shouldEndSession = true;
+	var generalCommandSlot = intent.slots.CmdGen;
+	var specificCommandSlot = intent.slots.CmdSpe;
+
+	if (session.attributes) {
+		selectedTool = session.attributes.selectedTool;
+	} else {
+		speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
+		shouldEndSession = true;
         callback(sessionAttributes,
          buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
 
-    
+    console.log("BEFORE makeFinalCommandReq");
+	if(generalCommandSlot){
+		generalCommand = generalCommandSlot.value;
+	}
+	else{
+		speechOutput = "Oops! You haven't selected a command yet. Say, Tell me about vim. Goodbye";
+		shouldEndSession = true;
+        callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+	}
 
-    if (generalCommandSlot && specificCommandSlot) {
-        var response;
-        Command = generalCommandSlot.value + " ";
-	
-	// how do i delete 2/4/7/n lines
-        if (num_to_n) {
-	       Command += "n ";
-        }	
-	    Command += specificCommandSlot.value;
+    if (specificCommandSlot) {
+        specificCommand = specificCommandSlot.value;
+        makeFinalCommandReq(selectedTool, generalCommand, specificCommand, function (result) {
+            console.log("finished makeFinalCommandReq, response = "+ result);
+            callback(sessionAttributes,
+                buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
 
-	    makeFinalCommandReq(selectedTool, Command, response);
-        speechOutput = response;
-        //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
+        });
+        //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + specificCommand + "Learn more?";
 
-    }
-    else {
+    } else {
         speechOutput = "Oops! you didnt select a tool. Try requesting a tool. Say, tell me how to delete";
         repromptText = "";
     }
-
-    callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-
 }
 
 function checkCorrect(intent, session, callback) {
@@ -202,7 +202,7 @@ function getGeneralCommand(intent, session, callback) {
     console.log("BEFORE makeFinalCommandReq");
     if (generalCommandSlot) {
         generalCommand = generalCommandSlot.value;
-        makeFinalCommandReq(selectedTool, generalCommand, function (result) {
+        makeFinalCommandReq(selectedTool, generalCommand, null, function (result) {
             console.log("finished makeFinalCommandReq, response = "+ result);
             callback(sessionAttributes,
                 buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
@@ -211,13 +211,9 @@ function getGeneralCommand(intent, session, callback) {
         //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
 
     } else {
-        speechOutput = "Oops! you didnt select a tool. Try requesting a tool. Say, tell me how to delete";
+        speechOutput = "Oops! you didnt select a command. Try requesting a tool. Say, tell me how to delete";
         repromptText = "";
     }
-
-    
-
-
 }
 
 function learnMore(intent, session, callback) {
@@ -243,9 +239,9 @@ function learnMore(intent, session, callback) {
 
 }
 
-function makeFinalCommandReq(tool, command, callback) {
+function makeFinalCommandReq(tool, command, specifier, callback) {
     console.log("TESTING123 are we here?");
-    makeCommandReq(tool, command, function commandReqCallback(err, commandResponse) {
+    makeCommandReq(tool, command, specifier, function commandReqCallback(err, commandResponse) {
         var speechOutput;
         console.log("supposedly have commandResp and it = " + commandResponse);
         if (err) {
@@ -260,8 +256,8 @@ function makeFinalCommandReq(tool, command, callback) {
 
 }
 
-function makeCommandReq(tool, command, commandReqCallback) {
-    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + tool + "/" + command + "/line.json";
+function makeCommandReq(tool, command, specifier, commandReqCallback) {
+    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + tool + "/" + command +  (specifier ? "/" + specifier : "") + ".json";
     console.log("inside makeCommandReq endpoint =" + endpoint);
 
     https.get(endpoint, function (res){
