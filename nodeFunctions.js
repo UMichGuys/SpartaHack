@@ -257,7 +257,11 @@ function makeFinalCommandReq(tool, command, specifier, callback) {
 }
 
 function makeCommandReq(tool, command, specifier, commandReqCallback) {
-    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + tool + "/" + command +  (specifier ? "/" + specifier : "") + ".json";
+    var lowCaseCommand = command.toLowerCase();
+    console.log("lowCaseCommand = " + lowCaseCommand);
+    var lowCaseSpecifier = (specifier) ? specifier.toLowerCase() : "";
+    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + encodeURIComponent(tool) + "/" 
+        + encodeURIComponent(lowCaseCommand) +  (specifier ? "/" + encodeURIComponent(lowCaseSpecifier) : "") + ".json";
     console.log("inside makeCommandReq endpoint =" + endpoint);
 
     https.get(endpoint, function (res){
