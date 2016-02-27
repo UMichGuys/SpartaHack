@@ -141,21 +141,21 @@ function getSpecificCommand(intent, session, callback) {
     var specificCommandSlot = intent.slots.CmdSpe;
     
     if (session.attributes) {
-	selectedTool = session.attributes.selectedTool;
+	   selectedTool = session.attributes.selectedTool;
     } else {
-	speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
-	shouldEndSession = true;
+	speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim.";
+	shouldEndSession = false;
         callback(sessionAttributes,
 		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
     
     console.log("BEFORE makeFinalCommandReq");
     if(generalCommandSlot){
-	generalCommand = generalCommandSlot.value;
+	   generalCommand = generalCommandSlot.value;
     }
     else{//YO
-	speechOutput = "Oops! You haven't selected a command yet. Say, Tell me about vim. Goodbye"; //THIS NEEDS TO BE FIXED
-	shouldEndSession = true; //THIS NEEDS TO BE FIXED
+	   speechOutput = "Oops! You haven't selected a command yet. Say, Tell me about vim."; 
+	   shouldEndSession = false;
         callback(sessionAttributes,
 		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
@@ -194,8 +194,8 @@ function getGeneralCommand(intent, session, callback) {
     if (session.attributes) {
         selectedTool = session.attributes.selectedTool;
     } else {
-        speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
-        shouldEndSession = true;
+        speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim.";
+        shouldEndSession = false;
         callback(sessionAttributes,
 		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
@@ -344,11 +344,9 @@ function setToolInSession(intent, session, callback) {
 	}
         sessionAttributes = createToolAttributes(selectedTool);
 
-	var vbool = selectedTool === "vim"; //is selected tool vim?
-
         speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
-            "for a shorcut or command, by saying, for example," + (vbool ? "how do I highlight the URL" : " how do I insert?");
-        repromptText = "Ask me for a shortcut or command by saying how do I do something?";
+            "for a shorcut or command.";
+        repromptText = "Ask me for a shortcut or command.";
     } else {
         speechOutput = "I'm not sure what application you're using. Please try again";
         repromptText = "I'm not sure what your application you're using"  +
