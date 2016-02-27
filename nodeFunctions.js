@@ -135,7 +135,6 @@ function checkCorrect(intent, session, callback) {
 function getGeneralCommand(intent, session, callback) {
     var selectedTool;
     var generalCommand;
-    var queryString = "";
     var repromptText = null;
     var sessionAttributes = {};
     var shouldEndSession = false;
@@ -169,6 +168,24 @@ function getGeneralCommand(intent, session, callback) {
 }
 
 function learnMore(intent, session, callback) {
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "I didn't hear what you said. Please say yes or no.";
+    var learnMoreAction = intent['slots']['Decision']['value'];
+
+    if (learnMoreAction === 'yes') {
+        //func to grab more info
+        //for now just do the same thing as else
+        speechOutput = "Ok I hope I could help. Happy programming.";
+        shouldEndSession = true;
+    } else {
+        speechOutput = "Ok I hope I could help. Happy programming.";
+        shouldEndSession = true;
+    }
+
+    callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
 }
 
