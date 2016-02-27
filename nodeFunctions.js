@@ -78,9 +78,7 @@ function onIntent(intentRequest, session, callback) {
         intentName = intentRequest.intent.name;
 
     // Dispatch to your skill's intent handlers
-    if ("WhatsMyColorIntent" === intentName) {
-        getColorFromSession(intent, session, callback);
-    } else if ("GiveToolIntent" === intentName) {
+    if ("GiveToolIntent" === intentName) {
         setToolInSession(intent, session, callback);
     }
     else if ("WhatsMyToolIntent" === intentName) {
@@ -113,7 +111,7 @@ function getWelcomeResponse(callback) {
         "Please tell ask me about a tool you'd like to learn";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    var repromptText = "";//"Please tell me your favorite color by saying, " +
+    var repromptText = "Please tell me a tool you'd like to learn more about";
     var shouldEndSession = false;
 
     callback(sessionAttributes,
@@ -181,31 +179,6 @@ function getToolFromSession(intent, session, callback) {
          buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
 }
 
-function getColorFromSession(intent, session, callback) {
-    var favoriteColor;
-    var repromptText = null;
-    var sessionAttributes = {};
-    var shouldEndSession = false;
-    var speechOutput = "";
-
-    if (session.attributes) {
-        favoriteColor = session.attributes.favoriteColor;
-    }
-
-    if (favoriteColor) {
-        speechOutput = "Your favorite color is " + favoriteColor + ". Goodbye.";
-        shouldEndSession = true;
-    } else {
-        speechOutput = "I'm not sure what your favorite color is, you can say, my favorite color " +
-            " is red";
-    }
-
-    // Setting repromptText to null signifies that we do not want to reprompt the user.
-    // If the user does not respond or says something that is not understood, the session
-    // will end.
-    callback(sessionAttributes,
-         buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
-}
 
 // --------------- Helpers that build all of the responses -----------------------
 
