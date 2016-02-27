@@ -128,6 +128,51 @@ function getWelcomeResponse(callback) {
 }
 
 function getSpecificCommand(intent, session, callback) {
+    var cardTitle = intent.name;
+    var selectedTool;
+    var generalCommand;
+    var repromptText = null;
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "";
+    var specificCommandSlot = intent.slots.CmdSpe;
+    var generalCommandSlot = intent.slots.CmdGen;
+    var num_to_n = intent.slots.AMAZON.NUMBER;
+ 
+    if (session.attributes) {
+        selectedTool = session.attributes.selectedTool;
+    } else {
+        speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
+        shouldEndSession = true;
+        callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    }
+
+    
+
+    if (generalCommandSlot && specificCommandSlot) {
+        var response;
+        Command = generalCommandSlot.value + " ";
+	
+	// how do i delete 2/4/7/n lines
+        if (num_to_n)
+	    Command += "n ";
+	
+	Command += specificCommandSlot.value;
+
+	makeFinalCommandReq(selectedTool, Command, response);
+        speechOutput = response;
+        //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
+
+    }
+    else {
+        speechOutput = "Oops! you didnt select a tool. Try requesting a tool. Say, tell me how to delete";
+        repromptText = "";
+    }
+
+    callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+
 
 }
 
