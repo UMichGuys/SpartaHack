@@ -80,11 +80,17 @@ function onIntent(intentRequest, session, callback) {
     // Dispatch to your skill's intent handlers
     if ("GiveToolIntent" === intentName) {
         setToolInSession(intent, session, callback);
-    }
-    else if ("WhatsMyToolIntent" === intentName) {
+    } else if ("WhatsMyToolIntent" === intentName) {
         getToolFromSession(intent, session, callback);
-    }
-    else if ("AMAZON.HelpIntent" === intentName) {
+    } else if ("RequestCmdGenIntent" === intentName) {
+        getGeneralCommand(intent, session, callback); 
+    } else if ("RequestCmdSpecIntent" === intentName) {
+        getSpecificCommand(intent, session, callback);
+    } else if ("LearnMoreIntent" === intentName) {
+        learnMore(intent, session, callback);
+    } else if ("checkCorrectIntent" === intentName){
+        checkCorrect(intent, session, callback);
+    } else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
         throw "Invalid intent";
@@ -118,6 +124,22 @@ function getWelcomeResponse(callback) {
         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
+function getSpecificCommand(intent, session, callback) {
+
+}
+
+function checkCorrect(intent, session, callback) {
+
+}
+
+function getGeneralCommand(intent, session, callback) {
+    var cardTitle = intent.name;
+    var selectedCmd = intent.slots.CmdGen;
+}
+
+function learnMore(intent, session, callback) {
+
+}
 
 
 
