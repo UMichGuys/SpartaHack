@@ -82,7 +82,11 @@ function onIntent(intentRequest, session, callback) {
         setColorInSession(intent, session, callback);
     } else if ("WhatsMyColorIntent" === intentName) {
         getColorFromSession(intent, session, callback);
-    } else if ("AMAZON.HelpIntent" === intentName) {
+    } else if ("GetToolIntent" === intentName) {
+        setToolInSession(intent, session, callback);
+    }
+
+    else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
         throw "Invalid intent";
@@ -117,6 +121,35 @@ function getWelcomeResponse(callback) {
         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
+
+
+/**
+ * Sets the tool (application) in the session and prepares the speech to reply to the user.
+ */
+function setIntentInSession(intent, session, callback) {
+    var cardTitle = intent.name;
+    var selectedToolSlot = intent.slots.Tool;
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "";
+
+    if (selectedToolSlot) {
+        var selectedTool = selectedToolSlot.value;
+        sessionAttributes = createToolAttributes(selectedTool);
+        speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
+            "for a shorcut, by saying, for example, how do I insert?";
+        repromptText = "Ask me for a shortcut by saying how do I do something?";
+    } else {
+        speechOutput = "I'm not sure what application you're using. Please try again";
+        repromptText = "I'm not sure what your application you're using"  +
+            "Ask me for a shortcut by saying how do I do something?";
+    }
+
+    callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
 /**
  * Sets the color in the session and prepares the speech to reply to the user.
  */
@@ -142,6 +175,12 @@ function setColorInSession(intent, session, callback) {
 
     callback(sessionAttributes,
          buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
+function createToolAttributes(selectedTool) {
+    return {
+        selectedTool: selectedTool
+    };
 }
 
 function createFavoriteColorAttributes(favoriteColor) {
