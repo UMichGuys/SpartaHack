@@ -133,15 +133,96 @@ function checkCorrect(intent, session, callback) {
 }
 
 function getGeneralCommand(intent, session, callback) {
-    var cardTitle = intent.name;
-    var selectedCmd = intent.slots.CmdGen;
+    var selectedTool;
+    var generalCommand;
+    var queryString = "";
+    var repromptText = null;
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "";
+    var generalCommandSlot = intent.slots.CmdGen;
+
+    if (session.attributes) {
+        selectedTool = session.attributes.selectedTool;
+    } else {
+        speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim. Goodbye";
+        shouldEndSession = true;
+        callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    }
+
+    if (generalCommandSlot) {
+        generalCommand = generalCommandSlot.value;
+        //makeFinalCommandReq(selectedTool, command, response)
+
+    } else {
+        speechOutput = "Oops! you didnt select a tool. Try requesting a tool. Say, tell me how to delete";
+        repromptText = "";
+        callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    }
+
+    callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+
+
 }
 
 function learnMore(intent, session, callback) {
 
 }
 
+function makeFinalCommandReq(tool, command, response) {
+    makeCommandReq(tool, command, function commandReqCallback(err, commandResponse) {
+        var speechOutput;
 
+        if (err) {
+            speechOutput = "Sorry, we couldn't handle your command request. Please try again later.";
+        } else {
+            speechOutput = "To " + command + " in " + session + " press " + commandResponse.command_data;
+        }
+
+        response.tellWithCard(speechOutput, "DevTalk", speechOutput);
+    });
+}
+
+function makeCommandReq(err, command, commandReqCallback) {
+    var endpoint = "";//ENDPOINT_URL_HERE
+    var queryString = '?' + command; //MIGHT NEED OTHER ARGS
+
+    http.get(endpoint+ queryString, function (){
+        var ourResponseString = '';
+        console.log('Status Code: ' + res.statusCode);
+
+        if (res.statusCode != 200) {
+            commandReqCallback(new Error("Non 200 Response"));
+        }
+
+        res.on('data', function (data) {
+            ourResponseString += data;
+        });
+
+        res.on('end', function () {
+            var ourResponseObject = JSON.parse(ourResponseString);
+
+            if (ourResponseObject.error) {
+                console.log("Response error: "+ ourResponseObject.error.message);
+            } else {
+                var command = findCommand(ourResponseObject);
+                commandReqCallback(null, command);
+            }
+        });
+    }).on('error', function (e) {
+        console.log("Communication error: " + e.message);
+        commandReqCallback(new Error(e.message));
+    });
+}
+
+function findCommand(object) {
+    return {
+        command_data: object.data; //should be object.JSON_name
+    }
+}
 
 /**
  * Sets the tool (application) in the session and prepares the speech to reply to the user.
