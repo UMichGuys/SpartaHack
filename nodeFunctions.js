@@ -7,6 +7,9 @@
  * http://amzn.to/1LGWsLG
  */
 
+
+var http = require('https')
+
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
 exports.handler = function (event, context) {
@@ -152,10 +155,11 @@ function getGeneralCommand(intent, session, callback) {
     }
 
     if (generalCommandSlot) {
+        var response;
         generalCommand = generalCommandSlot.value;
-        //makeFinalCommandReq(selectedTool, command, response)
-        //speechOutput = response (??)
-        speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
+        makeFinalCommandReq(selectedTool, generalCommand, response);
+        speechOutput = response;
+        //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
 
     } else {
         speechOutput = "Oops! you didnt select a tool. Try requesting a tool. Say, tell me how to delete";
@@ -201,15 +205,14 @@ function makeFinalCommandReq(tool, command, response) {
             speechOutput = "To " + command + " in " + session + " press " + commandResponse.command_data;
         }
 
-        response.tellWithCard(speechOutput, "DevTalk", speechOutput);
+        response.tell(speechOutput);
     });
 }
 
-function makeCommandReq(err, command, commandReqCallback) {
-    var endpoint = "";//ENDPOINT_URL_HERE
-    var queryString = '?' + command; //MIGHT NEED OTHER ARGS
+function makeCommandReq(tool, command, commandReqCallback) {
+    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + tool + "/" + command + ".json";
 
-    http.get(endpoint+ queryString, function (){
+    http.get(endpoint, function (){
         var ourResponseString = '';
         console.log('Status Code: ' + res.statusCode);
 
@@ -247,7 +250,6 @@ function findCommand(object) {
  * Sets the tool (application) in the session and prepares the speech to reply to the user.
  */
 function setToolInSession(intent, session, callback) {
-    var cardTitle = intent.name;
     var selectedToolSlot = intent.slots.Tool;
     var repromptText = "";
     var sessionAttributes = {};
@@ -267,7 +269,7 @@ function setToolInSession(intent, session, callback) {
     }
 
     callback(sessionAttributes,
-         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+         buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
 }
 
 
