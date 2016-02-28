@@ -10,6 +10,9 @@
 
 var https = require('https')
 
+var possibleVimFailures = ["vin", "bin", "them", "van"];
+var possibleGitFailures = ["get up", "gethub", "get hub", "get", "git"];
+
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
 exports.handler = function (event, context) {
@@ -135,9 +138,6 @@ function getQuickAction(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
 
-    var possibleVimFailures = ["vin", "bin", "them", "van"];
-    var possibleGitFailures = ["get up", "gethub"];
-
     console.log("about to check specifier");
     var specCmdSlot = intent.slots.CmdSpe;
     // slots can be missing, or slots can be provided but with empty value.
@@ -149,9 +149,12 @@ function getQuickAction(intent, session, callback) {
     }
     console.log("specifier = " + specificCommand);
 
-    for (var i in possibleVimFailures)
+    for (var i in possibleGitFailures)
     {
-        if (selectedTool === possibleVimFailures[i]) {
+        if (selectedTool === possibleGitFailures[i]) {
+            selectedTool = "git hub";
+            break;
+        } else if (selectedTool === possibleVimFailures[i]) {
           selectedTool = "vim";
           break;
         } else if (selectedTool === "google chrome") {
@@ -159,9 +162,6 @@ function getQuickAction(intent, session, callback) {
             break;
         } else if (selectedTool === "mux") {
             selectedTool = "tmux";
-            break;
-        } else if (selectedTool === possibleGitFailures[i]) {
-            selectedTool = "git hub";
             break;
         }
     }
@@ -276,7 +276,7 @@ function makeFinalCommandReq(tool, command, specifier, callback) {
         if (err) {
             speechOutput = "Sorry, we couldn't handle your command request. Please try again later.";
         } else {
-            speechOutput = "To " + command + " in " + tool + " press " + commandResponse + ".";
+            speechOutput = "To " + command + " in " + tool + " press " + commandResponse;
         }//////////////////////////////////////////////////////////////////////
         speechOutput = speechOutput.replace(/['"]+/g, ''); //what does this doo
         console.log("speechOutput = " + speechOutput + ".");/////////////////////////
@@ -364,11 +364,7 @@ function setToolInSession(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    
-    var possibleVimFailures = ["vin", "bin", "them", "van"];
-    var possibleGitFailures = ["get up", "gethub"];
 
-    
     if (selectedToolSlot) {
         var selectedTool = selectedToolSlot.value;
 	for (var i in possibleVimFailures)
