@@ -155,6 +155,7 @@ function getQuickAction(intent, session, callback) {
     var generalCommand = intent.slots.CmdGen.value;
     var specificCommand; 
     var repromptText = null;
+    var speechOutput;
     var sessionAttributes = {};
     var shouldEndSession = false;
 
@@ -169,30 +170,38 @@ function getQuickAction(intent, session, callback) {
     }
     console.log("specifier = " + specificCommand);
 
-    for (var i in possibleGitFailures)
-    {
+    for (var i in possibleGitFailures) {
         if (selectedTool === possibleGitFailures[i]) {
             selectedTool = "git hub";
             break;
-        } else if (selectedTool === possibleVimFailures[i]) {
+        }
+    }
+    for (var i in possibleVimFailures) {     
+        if (selectedTool === possibleVimFailures[i]) {
           selectedTool = "vim";
           break;
-        } else if (selectedTool === "google chrome") {
-            selectedTool = "chrome";
-            break;
-        } else if (selectedTool === "mux") {
-            selectedTool = "tmux";
-            break;
         }
+    } 
+    if (selectedTool === "google chrome") {
+        selectedTool = "chrome";
+    } else if (selectedTool === "mux") {
+        selectedTool = "tmux";
+    }
+
+    if (selectedTool === "emax" || selectedTool === "emacs" || selectedTool === "the max") {
+        speechOutput = "Unfortunetly, I don't support emacs. It is ok though, because real programmers use vim.";
+        repromptText = "If you'd like to learn more about vim, you need only ask.";
+        callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
     }
 
     console.log("tool = "+ selectedTool);
 
 
     makeFinalCommandReq(selectedTool, generalCommand, specificCommand, function (result) {
+        sessionAttributes = { lastSpeechOutput : result };
         callback(sessionAttributes,
          buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
-        setLastCommand(result, sessionAttributes);
     
     });
 
@@ -237,9 +246,9 @@ function getSpecificCommand(intent, session, callback) {
         specificCommand = specificCommandSlot.value;
         makeFinalCommandReq(selectedTool, generalCommand, specificCommand, function (result) {
             console.log("finished makeFinalCommandReq, response = "+ result);
+            sessionAttributes = { lastSpeechOutput: result };
             callback(sessionAttributes,
                 buildSpeechletResponse(cardTitle, result, result, true));
-            setLastCommand(result, sessionAttributes);
 
         });
 
@@ -277,9 +286,9 @@ function getGeneralCommand(intent, session, callback) {
         
 	makeFinalCommandReq(selectedTool, generalCommand, null, function (result) {
             console.log("finished makeFinalCommandReq, response = "+ result);
+            sessionAttributes = { lastSpeechOutput : result };
             callback(sessionAttributes,
              buildSpeechletResponse(cardTitle, result, result, shouldEndSession));
-            setLastCommand(result, sessionAttributes);
 	    
         });
         //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
@@ -292,9 +301,6 @@ function getGeneralCommand(intent, session, callback) {
     }
 }
 
-function setLastCommand(text, sessionAttributes) {
-    sessionAttributes = CreateLastAttribute(text);
-}
 
 function makeFinalCommandReq(tool, command, specifier, callback) {
     console.log("TESTING123 are we here?");
@@ -395,42 +401,42 @@ function setToolInSession(intent, session, callback) {
 
     if (selectedToolSlot) {
         var selectedTool = selectedToolSlot.value;
-	for (var i in possibleVimFailures)
-	{
-	    if (selectedTool === possibleVimFailures[i]) {
-		  selectedTool = "vim";
-          break;
-	    } else if (selectedTool === "google chrome") {
-            selectedTool = "chrome";
-            break;
-        } else if (selectedTool === "mux") {
-            selectedTool = "tmux";
-            break;
-        } else if (selectedTool === possibleGitFailures[i]) {
-            selectedTool = "git hub";
-            break;
-        }
-	}
+    	for (var i in possibleVimFailures)
+    	{
+    	    if (selectedTool === possibleVimFailures[i]) {
+    		  selectedTool = "vim";
+              break;
+    	    } else if (selectedTool === "google chrome") {
+                selectedTool = "chrome";
+                break;
+            } else if (selectedTool === "mux") {
+                selectedTool = "tmux";
+                break;
+            } else if (selectedTool === possibleGitFailures[i]) {
+                selectedTool = "git hub";
+                break;
+            }
+    	}
         sessionAttributes = createToolAttributes(selectedTool);
 
         speechOutput = "You would like to learn more about " + selectedTool + ". You can ask me " +
-            "for a shorcut or command.";
+                "for a shorcut or command.";
         repromptText = "Ask me for a shortcut or command.";
     } else {
         speechOutput = "I'm not sure what application you're using. Please try again ";
         repromptText = "I'm not sure what your application you're using."  +
             "Ask me for a shortcut by saying how do I do something?";
     }
+    console.log("TESTINGGGGGG selectedTool = " + selectedTool);
+    if (selectedTool === "emax" || selectedTool === "emacs" || selectedTool === "the max" || selectedTool === "Emacs") {
+        speechOutput = "Unfortunetly, I don't support emacs. It is ok though, because real programmers use vim.";
+        repromptText = "If you'd like to learn more about vim, you need only ask.";
+    }
 
     callback(sessionAttributes,
          buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
 }
 
-function CreateLastAttribute(last) {
-    return {
-        lastSpeechOutput: last
-    };
-}
 
 function createToolAttributes(selectedTool) {
     return {
