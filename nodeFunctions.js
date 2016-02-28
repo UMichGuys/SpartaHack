@@ -293,7 +293,7 @@ function makeCommandReq(tool, command, specifier, commandReqCallback) {
                     for (var key in ourResponseObject) {
                         if (i > 2 || i > ourResponseObject["n"]) break;
                         if (key === "n") continue;
-                        command += key + " " + ourResponseObject[key];
+                        command +=  " " + key + " " + ourResponseObject[key];
                         ++i;
                     }
                 }
