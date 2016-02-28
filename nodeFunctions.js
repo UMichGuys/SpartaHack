@@ -89,10 +89,6 @@ function onIntent(intentRequest, session, callback) {
         getGeneralCommand(intent, session, callback); 
     } else if ("RequestCmdSpeIntent" === intentName) {
         getSpecificCommand(intent, session, callback);
-    } else if ("LearnMoreIntent" === intentName) {
-        learnMore(intent, session, callback);
-    } else if ("checkCorrectIntent" === intentName){
-        checkCorrect(intent, session, callback);
     } else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
@@ -144,6 +140,7 @@ function getSpecificCommand(intent, session, callback) {
 	   selectedTool = session.attributes.selectedTool;
     } else {
 	speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim.";
+    repromptText = "Please select a tool.";
 	shouldEndSession = false;
         callback(sessionAttributes,
 		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
@@ -154,8 +151,9 @@ function getSpecificCommand(intent, session, callback) {
 	   generalCommand = generalCommandSlot.value;
     }
     else{//YO
-	   speechOutput = "Oops! You haven't selected a command yet. Say, Tell me about vim."; 
-	   shouldEndSession = false;
+	    speechOutput = "Oops! You haven't selected a command yet. Say, Tell me about vim."; 
+        repromptText = "Please select a tool.";
+	    shouldEndSession = false;
         callback(sessionAttributes,
 		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
@@ -165,19 +163,16 @@ function getSpecificCommand(intent, session, callback) {
         makeFinalCommandReq(selectedTool, generalCommand, specificCommand, function (result) {
             console.log("finished makeFinalCommandReq, response = "+ result);
             callback(sessionAttributes,
-                buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
+                buildSpeechletResponse(cardTitle, result, result, true));
 
         });
-        //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + specificCommand + "Learn more?";
 
     } else {
-        speechOutput = "Oops! you didnt select a tool. Try requesting a tool. Say, tell me how to delete";
-        repromptText = "";
+        speechOutput = "Oops! you didnt select a supported command. Say, tell me how to delete.";
+        repromptText = "Say tell me how to delete.";
+        callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
-}
-
-function checkCorrect(intent, session, callback) {
-
 }
 
 function getGeneralCommand(intent, session, callback) {
@@ -197,7 +192,7 @@ function getGeneralCommand(intent, session, callback) {
         speechOutput = "Oops! You haven't selected a tool yet. Say, Tell me about vim.";
         shouldEndSession = false;
         callback(sessionAttributes,
-		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+		 buildSpeechletResponse(cardTitle, speechOutput, repromptText, true));
     }
     console.log("BEFORE makeFinalCommandReq");
     if (generalCommandSlot) {
@@ -206,38 +201,17 @@ function getGeneralCommand(intent, session, callback) {
 	makeFinalCommandReq(selectedTool, generalCommand, null, function (result) {
             console.log("finished makeFinalCommandReq, response = "+ result);
             callback(sessionAttributes,
-                     buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
+                     buildSpeechletResponse(cardTitle, result, result, shouldEndSession));
 	    
         });
         //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
 
     } else {
-        speechOutput = "Oops! you didnt select a command. Try requesting a tool. Say, tell me how to delete";
+        speechOutput = "Oops! you didnt select a command. Try requesting a tool. Say, tell me how to delete.";
         repromptText = "";
-    }
-}
-
-function learnMore(intent, session, callback) {
-    var cardTitle = intent.name;
-    var repromptText = "";
-    var sessionAttributes = {};
-    var shouldEndSession = false;
-    var speechOutput = "I didn't hear what you said. Please say yes or no.";
-    var learnMoreAction = intent['slots']['Decision']['value'];
-
-    if (learnMoreAction === 'yes') {
-        //func to grab more info
-        //for now just do the same thing as else
-        speechOutput = "Ok I hope I could help. Happy programming.";
-        shouldEndSession = true;
-    } else {
-        speechOutput = "Ok I hope I could help. Happy programming.";
-        shouldEndSession = true;
-    }
-
-    callback(sessionAttributes,
+        callback(sessionAttributes,
          buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
+    }
 }
 
 function makeFinalCommandReq(tool, command, specifier, callback) {
@@ -259,8 +233,9 @@ function makeFinalCommandReq(tool, command, specifier, callback) {
 
 function makeCommandReq(tool, command, specifier, commandReqCallback) {
     var lowCaseCommand = command.toLowerCase();
-    console.log("lowCaseCommand = " + lowCaseCommand);
+    createCommandAttributes(lowCaseCommand);
     var lowCaseSpecifier = (specifier) ? specifier.toLowerCase() : "";
+    createSpecCommandAttributes(lowCaseSpecifier);
     var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + encodeURIComponent(tool) + "/" 
         + encodeURIComponent(lowCaseCommand) +  (specifier ? "/" + encodeURIComponent(lowCaseSpecifier) : "") + ".json";
     console.log("inside makeCommandReq endpoint =" + endpoint);
@@ -287,7 +262,7 @@ function makeCommandReq(tool, command, specifier, commandReqCallback) {
                 console.log("Response error: "+ ourResponseString.error.message);
             } else {
                 var command = "";
-                if (ourResponseObject["n"] != undefined) {
+                if (ourResponseObject["n"] !== undefined) {
                     console.log("found n objects in JSON");
                     var i = 0;
                     for (var key in ourResponseObject) {
@@ -361,6 +336,18 @@ function setToolInSession(intent, session, callback) {
 function createToolAttributes(selectedTool) {
     return {
         selectedTool: selectedTool
+    };
+}
+
+function createCommandAttributes(selectedCommand) {
+    return {
+        selectedCommand: selectedCommand
+    };
+}
+
+function createSpecCommandAttributes(specCommand) {
+    return {
+        specCommand: specCommand
     };
 }
 
