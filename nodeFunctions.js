@@ -7,8 +7,7 @@
  * http://amzn.to/1LGWsLG
  */
 
-
-var https = require('https')
+var https = require('https');
 
 var possibleVimFailures = ["vin", "bin", "them", "van"];
 var possibleGitFailures = ["get up", "gethub", "get hub", "get", "git"];
@@ -94,7 +93,9 @@ function onIntent(intentRequest, session, callback) {
         getSpecificCommand(intent, session, callback);
     } else if ("QuickAskIntent" === intentName) {
         getQuickAction(intent, session, callback);
-    }else if ("AMAZON.HelpIntent" === intentName) {
+    } else if ("RecallCmdIntent" === intentName) {
+        recallCmd(intent, session, callback);
+    } else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
         throw "Invalid intent";
@@ -126,6 +127,25 @@ function getWelcomeResponse(callback) {
     
     callback(sessionAttributes,
              buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
+function recallCmd(intent, session, callback) {
+    console.log("selected recall Intent");
+    var cardTitle = intent.name;
+    var speechOutput = null;
+    var repromptText = null;
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+
+    if (session.attributes) {
+        speechOutput = "Here is the last command I could find."
+        speechOutput += session.attributes.lastSpeechOutput;
+    } else {
+        speechOutput = "I'm sorry. I couldn't find your last command. Please ask about a new command.";
+    }
+
+    callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
 function getQuickAction(intent, session, callback) {
@@ -172,6 +192,7 @@ function getQuickAction(intent, session, callback) {
     makeFinalCommandReq(selectedTool, generalCommand, specificCommand, function (result) {
         callback(sessionAttributes,
          buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
+        setLastCommand(result, sessionAttributes);
     
     });
 
@@ -218,8 +239,10 @@ function getSpecificCommand(intent, session, callback) {
             console.log("finished makeFinalCommandReq, response = "+ result);
             callback(sessionAttributes,
                 buildSpeechletResponse(cardTitle, result, result, true));
+            setLastCommand(result, sessionAttributes);
 
         });
+
 
     } else {
         speechOutput = "Oops! you didnt select a supported command. Say, tell me how to delete.";
@@ -255,7 +278,8 @@ function getGeneralCommand(intent, session, callback) {
 	makeFinalCommandReq(selectedTool, generalCommand, null, function (result) {
             console.log("finished makeFinalCommandReq, response = "+ result);
             callback(sessionAttributes,
-                     buildSpeechletResponse(cardTitle, result, result, shouldEndSession));
+             buildSpeechletResponse(cardTitle, result, result, shouldEndSession));
+            setLastCommand(result, sessionAttributes);
 	    
         });
         //speechOutput = "Pretending we made an api call to firebase. Here is the info on" + generalCommand + "Learn more?";
@@ -266,6 +290,10 @@ function getGeneralCommand(intent, session, callback) {
         callback(sessionAttributes,
          buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
     }
+}
+
+function setLastCommand(text, sessionAttributes) {
+    sessionAttributes = CreateLastAttribute(text);
 }
 
 function makeFinalCommandReq(tool, command, specifier, callback) {
@@ -398,6 +426,11 @@ function setToolInSession(intent, session, callback) {
          buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
 }
 
+function CreateLastAttribute(last) {
+    return {
+        lastSpeechOutput: last
+    };
+}
 
 function createToolAttributes(selectedTool) {
     return {
