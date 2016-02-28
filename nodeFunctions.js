@@ -248,10 +248,10 @@ function makeFinalCommandReq(tool, command, specifier, callback) {
         if (err) {
             speechOutput = "Sorry, we couldn't handle your command request. Please try again later.";
         } else {
-            speechOutput = "To " + command + " in " + tool + " press " + commandResponse;
-        }
-        speechOutput = speechOutput.replace(/['"]+/g, '');
-        console.log("speechOutput = " + speechOutput);
+            speechOutput = "To " + command + " in " + tool + " press " + commandResponse + ".";
+        }//////////////////////////////////////////////////////////////////////
+        speechOutput = speechOutput.replace(/['"]+/g, ''); //what does this doo
+        console.log("speechOutput = " + speechOutput + ".");/////////////////////////
         callback(speechOutput);
     });
 
@@ -348,8 +348,8 @@ function setToolInSession(intent, session, callback) {
             "for a shorcut or command.";
         repromptText = "Ask me for a shortcut or command.";
     } else {
-        speechOutput = "I'm not sure what application you're using. Please try again";
-        repromptText = "I'm not sure what your application you're using"  +
+        speechOutput = "I'm not sure what application you're using. Please try again ";
+        repromptText = "I'm not sure what your application you're using."  +
             "Ask me for a shortcut by saying how do I do something?";
     }
 
