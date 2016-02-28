@@ -232,11 +232,18 @@ function makeFinalCommandReq(tool, command, specifier, callback) {
 }
 
 function makeCommandReq(tool, command, specifier, commandReqCallback) {
+    console.log("command = " + command);
+    console.log("tool = "+ tool);
+    console.log("specifier = "+ specifier);
     var lowCaseCommand = command.toLowerCase();
     createCommandAttributes(lowCaseCommand);
-    var lowCaseSpecifier = (specifier) ? specifier.toLowerCase() : "";
+    var lowCaseSpecifier = (specifier !== undefined && specifier !== null) ? specifier.toLowerCase() : "";
     createSpecCommandAttributes(lowCaseSpecifier);
-    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + encodeURIComponent(tool) + "/" 
+    var query_tool = tool;
+    if (tool === "git hub") {
+        query_tool = "github";
+    }
+    var endpoint = "https://sweltering-inferno-344.firebaseio.com/" + encodeURIComponent(query_tool) + "/" 
         + encodeURIComponent(lowCaseCommand) +  (specifier ? "/" + encodeURIComponent(lowCaseSpecifier) : "") + ".json";
     console.log("inside makeCommandReq endpoint =" + endpoint);
 
@@ -269,6 +276,7 @@ function makeCommandReq(tool, command, specifier, commandReqCallback) {
                         if (i > 2 || i > ourResponseObject["n"]) break;
                         if (key === "n") continue;
                         command +=  " " + key + " " + ourResponseObject[key];
+                        if (i === 1 || i === 0) command += " or for ";
                         ++i;
                     }
                 }
@@ -303,6 +311,7 @@ function setToolInSession(intent, session, callback) {
     var speechOutput = "";
     
     var possibleVimFailures = ["vin", "bin", "them", "van"];
+    var possibleGitFailures = ["get up", "gethub"];
 
     
     if (selectedToolSlot) {
@@ -315,6 +324,12 @@ function setToolInSession(intent, session, callback) {
 	    } else if (selectedTool === "google chrome") {
             selectedTool = "chrome";
             break;
+        } else if (selectedTool === "mux") {
+            selectedTool = "tmux";
+            break;
+        } else if (selectedTool === possibleGitFailures[i]) {
+            selectedTool = "git hub";
+
         }
 	}
         sessionAttributes = createToolAttributes(selectedTool);
