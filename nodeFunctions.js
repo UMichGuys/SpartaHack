@@ -117,10 +117,10 @@ function getWelcomeResponse(callback) {
     var sessionAttributes = {};
     var cardTitle = "Welcome";
     var speechOutput = "Welcome to DevTalk. " +
-        "Please tell, or ask me about a Dev tool that you'd like to learn";
+        "Please tell me a Dev tool that you'd like to learn more about.";
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    var repromptText = "Please tell me a tool you'd like to learn more about";
+    var repromptText = "Please tell me a tool you'd like to learn more about.";
     var shouldEndSession = false;
     
     callback(sessionAttributes,
