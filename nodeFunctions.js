@@ -89,7 +89,9 @@ function onIntent(intentRequest, session, callback) {
         getGeneralCommand(intent, session, callback); 
     } else if ("RequestCmdSpeIntent" === intentName) {
         getSpecificCommand(intent, session, callback);
-    } else if ("AMAZON.HelpIntent" === intentName) {
+    } else if ("QuickAskIntent" === intentName) {
+        getQuickAction(intent, session, callback);
+    }else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
         throw "Invalid intent";
@@ -121,6 +123,58 @@ function getWelcomeResponse(callback) {
     
     callback(sessionAttributes,
              buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
+function getQuickAction(intent, session, callback) {
+    console.log("selected quickActionIntent");
+    var cardTitle = intent.name;
+    var selectedTool = intent.slots.Tool.value;
+    var generalCommand = intent.slots.CmdGen.value;
+    var specificCommand; 
+    var repromptText = null;
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+
+    var possibleVimFailures = ["vin", "bin", "them", "van"];
+    var possibleGitFailures = ["get up", "gethub"];
+
+    console.log("about to check specifier");
+    var specCmdSlot = intent.slots.CmdSpe;
+    // slots can be missing, or slots can be provided but with empty value.
+    // must test for both.
+    if (!specCmdSlot || !specCmdSlot.value) {
+        specificCommand = null;
+    } else {
+        specificCommand = specCmdSlot.value;
+    }
+    console.log("specifier = " + specificCommand);
+
+    for (var i in possibleVimFailures)
+    {
+        if (selectedTool === possibleVimFailures[i]) {
+          selectedTool = "vim";
+          break;
+        } else if (selectedTool === "google chrome") {
+            selectedTool = "chrome";
+            break;
+        } else if (selectedTool === "mux") {
+            selectedTool = "tmux";
+            break;
+        } else if (selectedTool === possibleGitFailures[i]) {
+            selectedTool = "git hub";
+            break;
+        }
+    }
+
+    console.log("tool = "+ selectedTool);
+
+
+    makeFinalCommandReq(selectedTool, generalCommand, specificCommand, function (result) {
+        callback(sessionAttributes,
+         buildSpeechletResponse(cardTitle, result, repromptText, shouldEndSession));
+    
+    });
+
 }
 
 function getSpecificCommand(intent, session, callback) {
@@ -304,6 +358,7 @@ function findCommand(object) {
  * Sets the tool (application) in the session and prepares the speech to reply to the user.
  */
 function setToolInSession(intent, session, callback) {
+    console.log("Inside set tool in sess");
     var selectedToolSlot = intent.slots.Tool;
     var repromptText = "";
     var sessionAttributes = {};
@@ -329,7 +384,7 @@ function setToolInSession(intent, session, callback) {
             break;
         } else if (selectedTool === possibleGitFailures[i]) {
             selectedTool = "git hub";
-
+            break;
         }
 	}
         sessionAttributes = createToolAttributes(selectedTool);
