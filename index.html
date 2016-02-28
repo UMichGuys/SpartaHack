@@ -4,10 +4,32 @@
 <html>
   <head>
   <!-- link to main stylesheet -->
+  <link rel="stylesheet" type="text/css" href="./style.css">
 
-	<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
-	  </head>
-  <body>
-  Test
+  <!-- link to Firebase -->
+  <!--  <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script type="text/javascript">
+      var myFirebaseRef = new Firebase("https://sweltering-inferno-344.firebaseio.com/");
+      myFirebaseRef.once("value", function(data){
+  		console.log(data.val());
+  		debugger
+      })
+    </script>
+  </head> <-->
+ <script type="text/javascript">'./database.js'</script>
+
+<table id="personDataTable">
+    <tr>
+        <th>Id</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+    </tr>
+    
+</table>
+        
+
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.js'></script>
   </body>
 </html>
+
